@@ -175,7 +175,7 @@ async def img_sampler(event):
     try:
         lim = lim[0]
         lim = lim.replace("lim=", "")
-        query = query.replace("lim=" + lim[0], "")
+        query = query.replace(f"lim={lim[0]}", "")
     except IndexError:
         lim = 15
     response = googleimagesdownload()
@@ -232,7 +232,7 @@ async def gsearch(q_event):
     try:
         page = page[0]
         page = page.replace("page=", "")
-        match = match.replace("page=" + page[0], "")
+        match = match.replace(f"page={page[0]}", "")
     except IndexError:
         page = 1
     search_args = (str(match), int(page))
@@ -254,7 +254,7 @@ async def gsearch(q_event):
     if BOTLOG:
         await q_event.client.send_message(
             BOTLOG_CHATID,
-            "Google Search query `" + match + "` was executed successfully",
+            f"Google Search query `{match}` was executed successfully",
         )
 
 
@@ -272,9 +272,8 @@ async def wiki(wiki_q):
         return
     result = summary(match)
     if len(result) >= 4096:
-        file = open("output.txt", "w+")
-        file.write(result)
-        file.close()
+        with open("output.txt", "w+") as file:
+            file.write(result)
         await wiki_q.client.send_file(
             wiki_q.chat_id,
             "output.txt",
@@ -301,7 +300,7 @@ async def _(event):
         mean = await urban.get_word(word)
         await event.edit("Text: **{}**\n\nMeaning: **{}**\n\nExample: __{}__".format(mean.word, mean.definition, mean.example))
     except asyncurban.WordNotFoundError:
-        await event.edit("No result found for **" + word + "**")
+        await event.edit(f"No result found for **{word}**")
 
 
 @register(outgoing=True, pattern=r"^.tts(?: |$)([\s\S]*)")
@@ -650,12 +649,11 @@ async def ReTrieveFile(input_file_name):
     files = {
         "image_file": (input_file_name, open(input_file_name, "rb")),
     }
-    r = requests.post("https://api.remove.bg/v1.0/removebg",
+    return requests.post("https://api.remove.bg/v1.0/removebg",
                       headers=headers,
                       files=files,
                       allow_redirects=True,
                       stream=True)
-    return r
 
 
 async def ReTrieveURL(input_url):
@@ -663,12 +661,11 @@ async def ReTrieveURL(input_url):
         "X-API-Key": REM_BG_API_KEY,
     }
     data = {"image_url": input_url}
-    r = requests.post("https://api.remove.bg/v1.0/removebg",
+    return requests.post("https://api.remove.bg/v1.0/removebg",
                       headers=headers,
                       data=data,
                       allow_redirects=True,
                       stream=True)
-    return r
 
 
 @register(pattern=r".ocr (.*)", outgoing=True)
@@ -702,9 +699,14 @@ async def parseqr(qr_e):
         await qr_e.get_reply_message())
     # parse the Official ZXing webpage to decode the QRCode
     command_to_exec = [
-        "curl", "-X", "POST", "-F", "f=@" + downloaded_file_name + "",
-        "https://zxing.org/w/decode"
+        "curl",
+        "-X",
+        "POST",
+        "-F",
+        f"f=@{downloaded_file_name}",
+        "https://zxing.org/w/decode",
     ]
+
     process = await asyncio.create_subprocess_exec(
         *command_to_exec,
         # stdout must a pipe to be accessible as process.stdout
@@ -743,9 +745,7 @@ async def bq(event):
             m_list = None
             with open(downloaded_file_name, "rb") as fd:
                 m_list = fd.readlines()
-            message = ""
-            for m in m_list:
-                message += m.decode("UTF-8") + "\r\n"
+            message = "".join(m.decode("UTF-8") + "\r\n" for m in m_list)
             os.remove(downloaded_file_name)
         else:
             message = previous_message.message
@@ -784,9 +784,7 @@ async def make_qr(makeqr):
             m_list = None
             with open(downloaded_file_name, "rb") as file:
                 m_list = file.readlines()
-            message = ""
-            for media in m_list:
-                message += media.decode("UTF-8") + "\r\n"
+            message = "".join(media.decode("UTF-8") + "\r\n" for media in m_list)
             os.remove(downloaded_file_name)
         else:
             message = previous_message.message
@@ -1121,7 +1119,7 @@ async def paste(pstl):
 
     if match:
         message = match
-    elif reply_id:
+    else:
         message = await pstl.get_reply_message()
         if message.media:
             downloaded_file_name = await pstl.client.download_media(
@@ -1131,16 +1129,14 @@ async def paste(pstl):
             m_list = None
             with open(downloaded_file_name, "rb") as fd:
                 m_list = fd.readlines()
-            message = ""
-            for m in m_list:
-                message += m.decode("UTF-8")
+            message = "".join(m.decode("UTF-8") for m in m_list)
             os.remove(downloaded_file_name)
         else:
             message = message.message
 
     # Dogbin
     await pstl.edit("`Pasting text . . .`")
-    resp = post(DOGBIN_URL + "documents", data=message.encode("utf-8"))
+    resp = post(f'{DOGBIN_URL}documents', data=message.encode("utf-8"))
 
     if resp.status_code == 200:
         response = resp.json()
@@ -1203,7 +1199,7 @@ async def get_dogbin_content(dog_url):
         )
         return
     except exceptions.Timeout as TimeoutErr:
-        await dog_url.edit("Request timed out." + str(TimeoutErr))
+        await dog_url.edit(f"Request timed out.{str(TimeoutErr)}")
         return
     except exceptions.TooManyRedirects as RedirectsErr:
         await dog_url.edit(
@@ -1236,7 +1232,7 @@ async def neko(nekobin):
 
     if match:
         message = match
-    elif reply_id:
+    else:
         message = await nekobin.get_reply_message()
         if message.media:
             downloaded_file_name = await nekobin.client.download_media(
@@ -1246,16 +1242,14 @@ async def neko(nekobin):
             m_list = None
             with open(downloaded_file_name, "rb") as fd:
                 m_list = fd.readlines()
-            message = ""
-            for m in m_list:
-                message += m.decode("UTF-8")
+            message = "".join(m.decode("UTF-8") for m in m_list)
             os.remove(downloaded_file_name)
         else:
             message = message.text
 
     # Nekobin
     await nekobin.edit("`Pasting text . . .`")
-    resp = post(NEKOBIN_URL + "api/documents", json={"content": message})
+    resp = post(f'{NEKOBIN_URL}api/documents', json={"content": message})
 
     if resp.status_code == 201:
         response = resp.json()
@@ -1287,8 +1281,7 @@ async def capture(url):
     chrome_options.arguments.remove("--window-size=1920x1080")
     driver = await chrome(chrome_options=chrome_options)
     input_str = url.pattern_match.group(1)
-    link_match = match(r'\bhttps?://.*\.\S+', input_str)
-    if link_match:
+    if link_match := match(r'\bhttps?://.*\.\S+', input_str):
         link = link_match.group()
     else:
         return await url.edit("`I need a valid link to take screenshots from.`")
@@ -1312,9 +1305,7 @@ async def capture(url):
     im_png = driver.get_screenshot_as_png()
     # saves screenshot of entire page
     driver.quit()
-    message_id = url.message.id
-    if url.reply_to_msg_id:
-        message_id = url.reply_to_msg_id
+    message_id = url.reply_to_msg_id or url.message.id
     with io.BytesIO(im_png) as out_file:
         out_file.name = "screencapture.png"
         await url.edit("`Uploading screenshot as file..`")

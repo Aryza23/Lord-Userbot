@@ -50,7 +50,7 @@ async def get_readable_time(seconds: int) -> str:
     for x in range(len(time_list)):
         time_list[x] = str(time_list[x]) + time_suffix_list[x]
     if len(time_list) == 4:
-        up_time += time_list.pop() + ", "
+        up_time += f'{time_list.pop()}, '
 
     time_list.reverse()
     up_time += ":".join(time_list)
@@ -98,10 +98,10 @@ async def psu(event):
     bw = "**Bandwith Digunakan**\n"
     bw += f"`Unggah  : {get_size(psutil.net_io_counters().bytes_sent)}`\n"
     bw += f"`Download: {get_size(psutil.net_io_counters().bytes_recv)}`\n"
-    help_string = f"{str(softw)}\n"
-    help_string += f"{str(cpuu)}\n"
-    help_string += f"{str(memm)}\n"
-    help_string += f"{str(bw)}\n"
+    help_string = f"{softw}\n"
+    help_string += f"{cpuu}\n"
+    help_string += f"{memm}\n"
+    help_string += f"{bw}\n"
     help_string += "**Informasi Mesin**\n"
     help_string += f"`Python {sys.version}`\n"
     help_string += f"`Telethon {__version__}`"
@@ -131,7 +131,7 @@ async def sysdetails(sysd):
             result = str(stdout.decode().strip()) + \
                 str(stderr.decode().strip())
 
-            await sysd.edit("`" + result + "`")
+            await sysd.edit(f"`{result}`")
         except FileNotFoundError:
             await sysd.edit("`Install neofetch first !!`")
 
@@ -179,8 +179,7 @@ async def bot_ver(event):
 async def pipcheck(pip):
     if pip.text[0].isalpha() or pip.text[0] in ("/", "#", "@", "!"):
         return
-    pipmodule = pip.pattern_match.group(1)
-    if pipmodule:
+    if pipmodule := pip.pattern_match.group(1):
         await pip.edit("`Mencari...`")
         pipc = await asyncrunapp(
             "pip3",
@@ -191,14 +190,13 @@ async def pipcheck(pip):
         )
 
         stdout, stderr = await pipc.communicate()
-        pipout = str(stdout.decode().strip()) + str(stderr.decode().strip())
-
-        if pipout:
+        if pipout := str(stdout.decode().strip()) + str(
+            stderr.decode().strip()
+        ):
             if len(pipout) > 4096:
                 await pip.edit("`Output Terlalu Besar, Dikirim Sebagai File`")
-                file = open("output.txt", "w+")
-                file.write(pipout)
-                file.close()
+                with open("output.txt", "w+") as file:
+                    file.write(pipout)
                 await pip.client.send_file(
                     pip.chat_id,
                     "output.txt",
@@ -341,11 +339,11 @@ async def amireallyaliveuser(username):
     """ For .aliveu command, change the username in the .alive command. """
     message = username.text
     output = ".aliveu [username] tidak boleh kosong"
-    if not (message == ".aliveu" or message[7:8] != " "):
+    if message != ".aliveu" and message[7:8] == " ":
         newuser = message[8:]
         global DEFAULTUSER
         DEFAULTUSER = newuser
-        output = "Berhasil mengubah pengguna pada .alive ke " + newuser + "!"
+        output = f"Berhasil mengubah pengguna pada .alive ke {newuser}!"
     await username.edit("`" f"{output}" "`")
 
 

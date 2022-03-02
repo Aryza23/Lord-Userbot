@@ -21,8 +21,7 @@ modules = CMD_HELP
 @register(outgoing=True, pattern="^.help(?: |$)(.*)")
 async def help(lord):
     """ For .help command,"""
-    args = lord.pattern_match.group(1).lower()
-    if args:
+    if args := lord.pattern_match.group(1).lower():
         if args in CMD_HELP:
             await lord.edit(str(CMD_HELP[args]))
         else:

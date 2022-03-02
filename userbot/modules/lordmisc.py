@@ -80,12 +80,11 @@ weebyfont = [
 
 logger = logging.getLogger(__name__)
 
-thumb_image_path = TEMP_DOWNLOAD_DIRECTORY + "/thumb_image.jpg"
+thumb_image_path = f'{TEMP_DOWNLOAD_DIRECTORY}/thumb_image.jpg'
 
 
-if 1 == 1:
-    name = "Profile Photos"
-    client = bot
+name = "Profile Photos"
+client = bot
 
 
 @register(outgoing=True, pattern="^.app(?: |$)(.*)")
@@ -118,7 +117,7 @@ async def apk(e):
             'div', 'Vpfmgd').findNext(
             'div', 'uzcko').img['data-src']
         app_details = "<a href='" + app_icon + "'>📲&#8203;</a>"
-        app_details += " <b>" + app_name + "</b>"
+        app_details += f" <b>{app_name}</b>"
         app_details += "\n\n<code>Developer :</code> <a href='" + \
             app_dev_link + "'>" + app_dev + "</a>"
         app_details += "\n<code>Rating :</code> " + app_rating.replace("Rated ", "⭐ ").replace(
@@ -130,7 +129,7 @@ async def apk(e):
     except IndexError:
         await e.edit("Pencarian tidak ditemukan. Mohon masukkan **Nama app yang valid**")
     except Exception as err:
-        await e.edit("Exception Occured:- " + str(err))
+        await e.edit(f"Exception Occured:- {str(err)}")
 
 
 @register(outgoing=True, pattern="^.undlt(?: |$)(.*)")
@@ -153,7 +152,7 @@ async def _(event):
     if event.fwd_from:
         return
     input = event.pattern_match.group(1)  # get input
-    exp = "Given expression is " + input  # report back input
+    exp = f"Given expression is {input}"
     # lazy workaround to add support for two digits
     final_input = tuple(input)
     term1part1 = final_input[0]

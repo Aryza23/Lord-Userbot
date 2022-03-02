@@ -74,7 +74,7 @@ async def tor_search(event):
     search_str = event.pattern_match.group(1)
 
     print(search_str)
-    await event.edit("Searching for " + search_str + ".....")
+    await event.edit(f"Searching for {search_str}.....")
     if " " in search_str:
         search_str = search_str.replace(" ", "+")
         print(search_str)
@@ -102,11 +102,7 @@ async def tor_search(event):
             title = title[20:]
             titles.append(title)
             urls.append("https://www.torrentdownloads.me" + div.p.a["href"])
-        except KeyError:
-            pass
-        except TypeError:
-            pass
-        except AttributeError:
+        except (KeyError, TypeError, AttributeError):
             pass
         if counter == 11:
             break

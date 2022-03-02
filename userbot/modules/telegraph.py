@@ -43,7 +43,7 @@ async def telegraphs(graph):
                     start = datetime.now()
                     media_urls = upload_file(downloaded_file_name)
                 except exceptions.TelegraphException as exc:
-                    await graph.edit("ERROR: " + str(exc))
+                    await graph.edit(f"ERROR: {str(exc)}")
                     os.remove(downloaded_file_name)
                 else:
                     end = datetime.now()
